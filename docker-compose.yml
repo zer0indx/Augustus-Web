@@ -1,0 +1,26 @@
+# Self-hosted Augustus Web. Copy .env.example to .env and edit it.
+# See web/README.md.
+services:
+  augustus:
+    build: .
+    image: augustus-web:latest
+    container_name: augustus-web
+    restart: unless-stopped
+    ports:
+      - "${AUGUSTUS_PORT:-8080}:8080"
+    environment:
+      # server: the game files come from the folder mounted at /gamedata (see volumes below)
+      # upload: every browser picks its own Caesar III folder or zip once (cached in the browser)
+      GAME_DATA_MODE: ${GAME_DATA_MODE:-server}
+      # Optional sign-in. With both empty the game opens without a sign-in page.
+      AUTH_USER: ${AUTH_USER:-}
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-}
+      TZ: ${TZ:-Europe/Kyiv}
+    volumes:
+      # Saves, augustus.ini and the session secret are always kept here, on the host
+      - ${SAVES_PATH:-./saves}:/saves
+      # Your installed Caesar III folder (the one with c3.sg2, c3.eng ...).
+      # Only read with GAME_DATA_MODE=server; ignored in upload mode.
+      - ${GAME_DATA_PATH:-./gamedata}:/gamedata:ro
+    # If the container cannot write to the saves folder, set your UID:GID (e.g. Synology "1026:100")
+    # user: "1026:100"

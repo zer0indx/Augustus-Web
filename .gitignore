@@ -58,3 +58,10 @@ ext/SDL2/*.zip
 ext/SDL2/*.tar.gz
 
 res/augustus.icns
+
+# Augustus Web: local deployment settings, saves and game files (see .env.example)
+/.env
+/saves/
+/gamedata/
+/build-web/
+*.tar

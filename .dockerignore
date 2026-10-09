@@ -1,0 +1,11 @@
+.git
+.github
+.vscode
+android/
+doc/
+build/
+build-*/
+saves/
+gamedata/
+.env
+*.tar

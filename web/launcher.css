@@ -1,0 +1,365 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600;700;800&display=swap');
+
+:root {
+  /* Caesar III Palette: Roman Sandstone, Travertine, Imperial Red & Gold */
+  --c3-bg-sky: #557c9e;
+  --c3-sand-light: #f5edd8;
+  --c3-sand: #e6d5b8;
+  --c3-sand-dark: #cbb692;
+  --c3-stone-border: #8d734e;
+  --c3-stone-shadow: #503d24;
+  --c3-stone-highlight: #fff6e4;
+  
+  --c3-parchment: #ede0c8;
+  --c3-parchment-deep: #decbb0;
+  --c3-ink: #2b1d11;
+  --c3-ink-muted: #5e4630;
+  
+  --c3-red: #8b1e0f;
+  --c3-red-light: #ab2c1a;
+  --c3-red-dark: #5c1005;
+  --c3-red-text: #fff3db;
+  
+  --c3-gold: #cfa83b;
+  --c3-gold-light: #fbe07a;
+  --c3-gold-dark: #8a6c1e;
+  
+  --display-title: "Cinzel Decorative", "Cinzel", "Palatino Linotype", Georgia, serif;
+  --display-ui: "Cinzel", "Palatino Linotype", Georgia, serif;
+  --body-font: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+
+  /* Mediterranean Roman Panorama (Warm Italian sky, distant hills, aqueducts) */
+  --roman-panorama:
+    radial-gradient(circle at 50% 35%, rgba(255, 240, 210, 0.25) 0%, rgba(0, 0, 0, 0.45) 85%),
+    radial-gradient(65% 25% at 50% 102%, #2c3822 0 60%, transparent 60.5%),
+    radial-gradient(90% 36% at 15% 108%, #4a3e2a 0 60%, transparent 60.5%),
+    radial-gradient(85% 30% at 85% 105%, #3b4d2c 0 60%, transparent 60.5%),
+    radial-gradient(55% 40% at 75% 90%, #76634c 0 55%, transparent 55.5%),
+    radial-gradient(40% 25% at 20% 86%, #82715c 0 55%, transparent 55.5%),
+    linear-gradient(to bottom, #395c80 0%, #6f95b9 35%, #d8a873 70%, #bb6f3c 100%);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+
+body {
+  color: var(--c3-ink);
+  font: 15px/1.5 var(--body-font);
+  background: #140d08;
+  user-select: none;
+}
+
+#setup {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5vh 16px 36px;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(18, 10, 5, 0.65) 100%),
+    url('background.jpg') center bottom / cover no-repeat,
+    var(--roman-panorama);
+  background-attachment: fixed;
+}
+
+/* Header styled as Roman Monumental Inscription */
+.title { text-align: center; margin-bottom: 3.5vh; }
+h1 {
+  margin: 0;
+  font: 700 clamp(38px, 7.5vw, 68px)/1.05 var(--display-title);
+  color: #fff4dc;
+  letter-spacing: .06em;
+  text-shadow:
+    0 2px 0 #3a1c0a,
+    0 0 5px #5c2408,
+    0 6px 18px rgba(0, 0, 0, 0.85);
+  text-transform: uppercase;
+}
+.sub {
+  margin: 8px 0 0;
+  font: 700 clamp(16px, 2.5vw, 22px)/1.3 var(--display-ui);
+  color: #f7dfaf;
+  letter-spacing: .16em;
+  text-shadow:
+    0 1px 0 #2e1405,
+    0 2px 8px rgba(0, 0, 0, 0.9);
+  text-transform: uppercase;
+}
+
+/* Stack of Roman Menu Buttons */
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 13px;
+  width: min(360px, 100%);
+}
+.menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: 100%;
+}
+.menu-group[hidden] { display: none; }
+
+button.menu-btn {
+  width: 100%;
+  padding: 11px 18px;
+  cursor: pointer;
+  font: 700 17px/1.2 var(--display-ui);
+  letter-spacing: .06em;
+  color: #2b1d11;
+  background: url('pattern.webp') repeat #d8c4a0;
+  border: 2px solid;
+  border-color: #fffaf0 #755b39 #755b39 #fffaf0;
+  outline: 1px solid #4a3821;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.55),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.6),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.25);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  transition: all .12s ease;
+}
+
+button.menu-btn:hover:not(:disabled),
+button.menu-btn:focus-visible {
+  color: var(--c3-red);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.18)),
+    url('pattern.webp') repeat #e2d1b0;
+  border-color: #ffe6a3 #533e24 #533e24 #ffe6a3;
+  outline-color: var(--c3-red);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.6),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+button.menu-btn:active:not(:disabled) {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)),
+    url('pattern.webp') repeat #cbb692;
+  border-color: #755b39 #fffaf0 #fffaf0 #755b39;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.35);
+  transform: translateY(1px);
+}
+
+button.menu-btn:disabled {
+  cursor: not-allowed;
+  color: #786958;
+  background:
+    linear-gradient(rgba(120, 110, 95, 0.5), rgba(120, 110, 95, 0.5)),
+    url('pattern.webp') repeat #aa9c84;
+  border-color: #c9bea9 #5c503f #5c503f #c9bea9;
+  outline-color: #443b30;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  text-shadow: none;
+  opacity: 0.7;
+}
+
+/* Primary Imperial PLAY Button - Roman Carved Tablet with Imperial Red Inscription */
+button.menu-btn.play {
+  font-size: 28px;
+  padding: 13px 22px;
+  color: var(--c3-red);
+  background: url('pattern.webp') repeat #decbb0;
+  border: 3px solid;
+  border-color: #fffaf0 #6e5230 #6e5230 #fffaf0;
+  outline: 2px solid #cfa83b;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.65),
+    0 0 14px rgba(207, 168, 59, 0.35),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.65),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.3);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8),
+    0 -1px 0 rgba(92, 16, 5, 0.3);
+}
+
+button.menu-btn.play:hover:not(:disabled) {
+  color: #ab2c1a;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)),
+    url('pattern.webp') repeat #e6d5b8;
+  outline-color: #fbe07a;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.7),
+    0 0 18px rgba(251, 224, 122, 0.6),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+button.menu-btn.play:active:not(:disabled) {
+  border-color: #6e5230 #fffaf0 #fffaf0 #6e5230;
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.45);
+  transform: translateY(1px);
+}
+
+button.menu-btn.play:disabled {
+  color: #8c7d75;
+  background:
+    linear-gradient(rgba(100, 90, 80, 0.55), rgba(100, 90, 80, 0.55)),
+    url('pattern.webp') repeat #8a7c70;
+  border-color: #a89c90 #4a4038 #4a4038 #a89c90;
+  outline-color: #6b6052;
+  box-shadow: none;
+  text-shadow: none;
+  opacity: 0.65;
+}
+
+button.menu-btn.small {
+  font-size: 13.5px;
+  padding: 7px 15px;
+  width: auto;
+}
+
+/* Caesar III Dialog Panel: Roman Sandstone Plaque */
+.panel {
+  width: min(590px, 100%);
+  margin-top: 3.5vh;
+  padding: 22px 26px;
+  background: url('pattern.webp') repeat #decbb0;
+  border: 4px solid #cbb692;
+  outline: 3px solid #846842;
+  box-shadow:
+    0 0 0 4px #533e24,
+    0 14px 40px rgba(0, 0, 0, 0.75);
+}
+
+.panel h2 {
+  margin: 0 0 14px;
+  font: 700 19px/1.3 var(--display-ui);
+  color: var(--c3-red);
+  text-align: center;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+.panel h2.bad { color: #a81c1c; }
+
+/* Inset Box: Sunken Stone Tablet */
+.inset {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.09)),
+    url('pattern.webp') repeat #d8c5a4;
+  border: 2px solid #a8906d;
+  box-shadow:
+    inset 2px 2px 6px rgba(45, 30, 15, 0.35),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.45);
+  padding: 14px 18px;
+  margin-top: 10px;
+  color: var(--c3-ink);
+  font-size: 14.5px;
+  line-height: 1.55;
+  text-align: left;
+}
+.inset p { margin: 0 0 10px; }
+.inset p:last-child { margin-bottom: 0; }
+
+#syncText {
+  color: var(--c3-ink-muted);
+  font-size: 13.5px;
+  margin-top: 8px;
+  font-style: italic;
+}
+#syncText:empty { display: none; }
+
+/* Roman Bronze Progress Bar */
+.bar {
+  height: 14px;
+  background: #3a2b1c;
+  border: 1px solid #6b5235;
+  box-shadow: inset 1px 1px 4px rgba(0, 0, 0, 0.6);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.bar > div {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(to right, #b88a24, #f5d162 50%, #d4a935);
+  transition: width .1s ease;
+}
+#progressText {
+  color: var(--c3-ink-muted);
+  font-size: 13px;
+  margin-top: 6px;
+  text-align: center;
+  font-family: var(--display-ui);
+  letter-spacing: .04em;
+}
+
+.footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* In-Game Canvas Container */
+#game {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000;
+  align-items: center;
+  justify-content: center;
+}
+#canvas {
+  display: block;
+  outline: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+body.playing #setup { display: none; }
+body.playing #game { display: flex; }
+
+#busy {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 10;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px;
+  font: 700 18px/1 var(--display-ui);
+  color: var(--c3-red);
+  background: var(--c3-parchment);
+  border: 3px solid #846842;
+  outline: 2px solid #533e24;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.75);
+}
+#busy[hidden] { display: none; }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  top: 16px;
+  z-index: 11;
+  pointer-events: none;
+  transform: translateX(-50%);
+  max-width: min(520px, calc(100vw - 32px));
+  padding: 10px 18px;
+  font: 14.5px/1.4 var(--body-font);
+  color: #fff8ea;
+  text-align: center;
+  background: rgba(43, 29, 17, 0.92);
+  border: 2px solid #cbb692;
+  outline: 1px solid #533e24;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
+}
+#toast[hidden] { display: none; }
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(139, 30, 15, 0.25);
+  border-top-color: var(--c3-red);
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+[hidden] { display: none !important; }

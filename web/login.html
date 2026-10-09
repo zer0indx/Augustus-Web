@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Augustus Web · Sign in</title>
+<link rel="icon" type="image/png" href="augustus_256.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@600;700;800&display=swap');
+
+  :root {
+    --c3-sand: #e6d5b8;
+    --c3-parchment: #ede0c8;
+    --c3-ink: #2b1d11;
+    --c3-ink-muted: #5e4630;
+    --c3-red: #8b1e0f;
+    --c3-red-dark: #5c1005;
+    --c3-gold: #cfa83b;
+    --display-title: "Cinzel Decorative", "Cinzel", "Palatino Linotype", Georgia, serif;
+    --display-ui: "Cinzel", "Palatino Linotype", Georgia, serif;
+    --body-font: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+
+    --roman-panorama:
+      radial-gradient(circle at 50% 35%, rgba(255, 240, 210, 0.25) 0%, rgba(0, 0, 0, 0.45) 85%),
+      radial-gradient(65% 25% at 50% 102%, #2c3822 0 60%, transparent 60.5%),
+      radial-gradient(90% 36% at 15% 108%, #4a3e2a 0 60%, transparent 60.5%),
+      radial-gradient(85% 30% at 85% 105%, #3b4d2c 0 60%, transparent 60.5%),
+      radial-gradient(55% 40% at 75% 90%, #76634c 0 55%, transparent 55.5%),
+      radial-gradient(40% 25% at 20% 86%, #82715c 0 55%, transparent 55.5%),
+      linear-gradient(to bottom, #395c80 0%, #6f95b9 35%, #d8a873 70%, #bb6f3c 100%);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--c3-ink);
+    font: 15px/1.5 var(--body-font);
+    background:
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(18, 10, 5, 0.65) 100%),
+      url('background.jpg') center bottom / cover no-repeat,
+      var(--roman-panorama);
+    background-attachment: fixed;
+    user-select: none;
+  }
+
+  .title { text-align: center; margin-bottom: 28px; }
+  h1 {
+    margin: 0;
+    font: 700 clamp(36px, 7vw, 64px)/1.05 var(--display-title);
+    color: #fff4dc;
+    letter-spacing: .06em;
+    text-shadow:
+      0 2px 0 #3a1c0a,
+      0 0 5px #5c2408,
+      0 6px 18px rgba(0, 0, 0, 0.85);
+    text-transform: uppercase;
+  }
+  .sub {
+    margin: 8px 0 0;
+    font: 700 clamp(16px, 2.5vw, 22px)/1.3 var(--display-ui);
+    color: #f7dfaf;
+    letter-spacing: .16em;
+    text-shadow:
+      0 1px 0 #2e1405,
+      0 2px 8px rgba(0, 0, 0, 0.9);
+    text-transform: uppercase;
+  }
+
+  .login-card {
+    width: min(390px, 100%);
+    padding: 24px 28px;
+    background:
+      linear-gradient(rgba(237, 224, 200, 0.9), rgba(222, 203, 176, 0.95)),
+      url('pattern.webp') repeat;
+    border: 4px solid #cbb692;
+    outline: 3px solid #846842;
+    box-shadow:
+      0 0 0 4px #533e24,
+      0 14px 40px rgba(0, 0, 0, 0.75);
+  }
+
+  .login-card h2 {
+    margin: 0 0 18px;
+    font: 700 20px/1.3 var(--display-ui);
+    color: var(--c3-red);
+    text-align: center;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+  }
+
+  .field { margin-bottom: 15px; }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-family: var(--display-ui);
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    color: var(--c3-ink-muted);
+    text-transform: uppercase;
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    font: inherit;
+    font-size: 15px;
+    color: #2b1d11;
+    background: linear-gradient(to bottom, #f7efe1 0%, #ebe0cd 100%);
+    border: 2px solid #b69e78;
+    outline: none;
+    box-shadow: inset 1px 1px 4px rgba(60, 40, 20, 0.25);
+    border-radius: 2px;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--c3-red);
+    box-shadow: 0 0 8px rgba(139, 30, 15, 0.35), inset 1px 1px 4px rgba(60, 40, 20, 0.25);
+  }
+
+  button.submit-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font: 700 18px/1.2 var(--display-ui);
+    letter-spacing: .06em;
+    color: #fff3cf;
+    background:
+      linear-gradient(to bottom, rgba(163, 40, 21, 0.92) 0%, rgba(118, 24, 10, 0.96) 100%),
+      url('pattern.webp') repeat;
+    border: 2px solid;
+    border-color: #e2634e #4a0c04 #4a0c04 #e2634e;
+    outline: 2px solid #f2c752;
+    box-shadow:
+      0 4px 14px rgba(0, 0, 0, 0.65),
+      0 0 10px rgba(242, 199, 82, 0.35);
+    text-shadow: 0 2px 2px #360700;
+    text-transform: uppercase;
+    transition: all .12s ease;
+  }
+
+  button.submit-btn:hover {
+    color: #fffde8;
+    background:
+      linear-gradient(to bottom, rgba(186, 50, 28, 0.94) 0%, rgba(137, 29, 13, 0.98) 100%),
+      url('pattern.webp') repeat;
+    outline-color: #ffe97a;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 14px rgba(255, 233, 122, 0.55);
+  }
+
+  button.submit-btn:active {
+    transform: translateY(1px);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.45);
+  }
+
+  #error {
+    margin-top: 14px;
+    padding: 9px 14px;
+    font-size: 14px;
+    color: #7d1208;
+    background: #f7dad5;
+    border: 1px solid #d96d60;
+    border-radius: 2px;
+    text-align: center;
+    display: none;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="title">
+  <h1>Augustus Web</h1>
+  <p class="sub">Caesar III</p>
+</div>
+
+<div class="login-card">
+  <h2>Sign in</h2>
+  <form id="loginForm">
+    <div class="field" id="userField" style="display:none;">
+      <label for="username">User</label>
+      <input type="text" id="username" name="username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required autofocus>
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Sign in</button>
+    <div id="error"></div>
+  </form>
+</div>
+
+<script>
+  (async function() {
+    const form = document.getElementById('loginForm');
+    const userField = document.getElementById('userField');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorEl = document.getElementById('error');
+    const submitBtn = document.getElementById('submitBtn');
+
+    try {
+      const res = await fetch('/api/auth/status');
+      const data = await res.json();
+      if (data.requiresUser) {
+        userField.style.display = 'block';
+        usernameInput.required = true;
+        usernameInput.focus();
+      }
+    } catch (e) {}
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      errorEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Checking…';
+
+      try {
+        const resp = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: usernameInput.value.trim(),
+            password: passwordInput.value
+          })
+        });
+        const result = await resp.json();
+        if (resp.ok && result.ok) {
+          window.location.href = '/';
+        } else {
+          errorEl.textContent = result.error || 'Wrong user name or password';
+          errorEl.style.display = 'block';
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      } catch (err) {
+        errorEl.textContent = 'Could not reach the server';
+        errorEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign in';
+      }
+    };
+  })();
+</script>
+</body>
+</html>
