@@ -1,26 +1,43 @@
-# Self-hosted Augustus Web. Copy .env.example to .env and edit it.
+# Self-hosted Augustus Web. Copy .env.example to .env, or set the variables in
+# your stack manager.
 # See web/README.md.
+
+# Pinned so the saves volume (augustus_augustus-data) stays the same
+# wherever the checkout lives; without it Compose derives the project name
+# from the folder name.
+name: augustus
 services:
-  augustus:
+  augustus-web:
+    # The published image when there is one for this name, otherwise built
+    # from this checkout. To run your own changes: docker compose up -d --build
+    image: ghcr.io/zer0indx/augustus-web:latest
     build: .
-    image: augustus-web:latest
+    pull_policy: missing
     container_name: augustus-web
     restart: unless-stopped
     ports:
-      - "${AUGUSTUS_PORT:-8080}:8080"
+      - "${AUGUSTUS_HTTP_PORT:-8080}:8080"
     environment:
-      # server: the game files come from the folder mounted at /gamedata (see volumes below)
-      # upload: every browser picks its own Caesar III folder or zip once (cached in the browser)
-      GAME_DATA_MODE: ${GAME_DATA_MODE:-server}
-      # Optional sign-in. With both empty the game opens without a sign-in page.
-      AUTH_USER: ${AUTH_USER:-}
-      AUTH_PASSWORD: ${AUTH_PASSWORD:-}
-      TZ: ${TZ:-Europe/Kyiv}
+      AUGUSTUS_USER: ${AUGUSTUS_USER:-caesar}
+      AUGUSTUS_PASSWORD: ${AUGUSTUS_PASSWORD:?set AUGUSTUS_PASSWORD (at least 12 characters)}
+      # "server": the game files come from the folder mounted at /game.
+      # "local": every browser picks its own Caesar III folder.
+      AUGUSTUS_GAME_SOURCE: ${AUGUSTUS_GAME_SOURCE:-server}
+      AUGUSTUS_SESSION_DAYS: ${AUGUSTUS_SESSION_DAYS:-30}
+      # 1: a reverse proxy is in front, the client address and https come
+      # from its headers. 0: browsers reach the port directly.
+      AUGUSTUS_TRUST_PROXY: ${AUGUSTUS_TRUST_PROXY:-0}
     volumes:
-      # Saves, augustus.ini and the session secret are always kept here, on the host
-      - ${SAVES_PATH:-./saves}:/saves
-      # Your installed Caesar III folder (the one with c3.sg2, c3.eng ...).
-      # Only read with GAME_DATA_MODE=server; ignored in upload mode.
-      - ${GAME_DATA_PATH:-./gamedata}:/gamedata:ro
-    # If the container cannot write to the saves folder, set your UID:GID (e.g. Synology "1026:100")
+      # Saves, their older versions and the session secret: the augustus-data
+      # volume, or the folder on the host that AUGUSTUS_DATA_PATH names.
+      - ${AUGUSTUS_DATA_PATH:-augustus-data}:/data
+      # Only read with AUGUSTUS_GAME_SOURCE=server: your Caesar III folder
+      # (the one with c3.sg2, c3.eng).
+      - ${AUGUSTUS_GAME_PATH:-./game}:/game:ro
+    # The container runs as user 1000. With a host folder in AUGUSTUS_DATA_PATH
+    # that this user cannot write to, set the folder's owner here
+    # (e.g. Synology "1026:100").
     # user: "1026:100"
+
+volumes:
+  augustus-data:

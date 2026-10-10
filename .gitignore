@@ -61,6 +61,8 @@ res/augustus.icns
 
 # Augustus Web: local deployment settings, saves and game files (see .env.example)
 /.env
+/data/
+/game/
 /saves/
 /gamedata/
 /build-web/

@@ -5,6 +5,8 @@ android/
 doc/
 build/
 build-*/
+data/
+game/
 saves/
 gamedata/
 .env
