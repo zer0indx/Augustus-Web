@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Augustus Web</title>
+<link rel="icon" type="image/png" href="static/augustus_256.png">
+<style>
+  /* Theme: the fonts, colours and pictures of this game: sandstone buttons
+     and plaques with imperial red lettering over a Roman panorama. The
+     background, the stone tile and the Marcellus SC font (SIL Open Font
+     License) are in static/. Everything after this block is the same in
+     eZeus Web, Akhenaten Web and Augustus Web. */
+  @font-face { font-family: "Marcellus SC"; font-display: swap;
+    src: url(static/MarcellusSC-Regular.ttf) format("truetype"); }
+  :root {
+    --display: "Marcellus SC", "Palatino Linotype", Palatino, Georgia, serif;
+    --body: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+    --body-size: 15px;
+    --backdrop: url(static/background.jpg);
+    --shade: linear-gradient(to bottom, #0003 0%, #120a05a6 100%);
+    /* Shown until the backdrop loads. */
+    --landscape:
+      radial-gradient(65% 25% at 50% 102%, #2c3822 0 60%, #0000 60.5%),
+      radial-gradient(90% 36% at 15% 108%, #4a3e2a 0 60%, #0000 60.5%),
+      radial-gradient(85% 30% at 85% 105%, #3b4d2c 0 60%, #0000 60.5%),
+      radial-gradient(55% 40% at 75% 90%, #76634c 0 55%, #0000 55.5%),
+      radial-gradient(40% 25% at 20% 86%, #82715c 0 55%, #0000 55.5%),
+      linear-gradient(to bottom, #395c80 0%, #6f95b9 35%, #d8a873 70%, #bb6f3c 100%);
+    --title: #fff4dc;
+    --title-shadow: 0 2px 0 #3a1c0a, 0 0 5px #5c2408, 0 6px 18px #000d;
+    --sub-shadow: 0 1px 0 #2e1405, 0 2px 8px #000e;
+    --heading: #8b1e0f; --text: #2b1d11; --muted: #5e4630; --bad: #a81c1c;
+    --accent: #8b1e0f;
+    --text-shadow: 0 1px 0 #ffffffa6;
+    --btn-fill: url(static/pattern.webp), #d8c4a0;
+    --btn-hi: #fffaf0; --btn-lo: #755b39; --btn-outline: #4a3821;
+    --btn-text: #2b1d11; --btn-off: #786958;
+    --panel-fill: url(static/pattern.webp), #decbb0;
+    --inset-fill: linear-gradient(#0000000d, #00000017), url(static/pattern.webp), #d8c5a4;
+    --rim-in: #cbb692; --rim-out: #846842; --frame: #533e24;
+    --bar-bg: #3a2b1c; --bar-fill: linear-gradient(#f5d162, #d4a935 50%, #b88a24);
+    --canvas-rendering: pixelated;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    color: var(--text);
+    font: var(--body-size)/1.5 var(--body);
+    background: #000;
+  }
+  #setup {
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 6vh 16px 32px;
+    background: var(--shade), var(--backdrop), var(--landscape);
+    background-size: cover; background-position: center bottom;
+  }
+
+  .title { text-align: center; margin-bottom: 4vh; }
+  h1 {
+    margin: 0; font: 400 clamp(40px, 8vw, 72px)/1 var(--display); color: var(--title);
+    letter-spacing: .04em; text-shadow: var(--title-shadow);
+  }
+  .sub {
+    margin: 10px 0 0; font: 400 clamp(14px, 2.2vw, 18px)/1.3 var(--display);
+    color: var(--title); letter-spacing: .06em; text-shadow: var(--sub-shadow);
+  }
+
+  /* Main-menu style stack of buttons. */
+  .menu { display: flex; flex-direction: column; align-items: center; gap: 14px;
+    width: min(340px, 100%); }
+  .menu-group { display: contents; }
+  .menu-group[hidden] { display: none; }
+  button.menu-btn {
+    width: 100%; padding: 9px 16px; cursor: pointer;
+    font: 400 19px/1.2 var(--display); letter-spacing: .05em; color: var(--btn-text);
+    background: var(--btn-fill);
+    border: 2px solid; border-color: var(--btn-hi) var(--btn-lo) var(--btn-lo) var(--btn-hi);
+    outline: 1px solid var(--btn-outline); box-shadow: 0 3px 10px #0007;
+    text-shadow: var(--text-shadow);
+  }
+  button.menu-btn:hover:not(:disabled), button.menu-btn:focus-visible { color: var(--accent); }
+  button.menu-btn:active:not(:disabled) {
+    border-color: var(--btn-lo) var(--btn-hi) var(--btn-hi) var(--btn-lo);
+  }
+  button.menu-btn:disabled { cursor: default; color: var(--btn-off); filter: saturate(.6); }
+  button.menu-btn.play { font-size: 26px; padding: 12px 16px; color: var(--accent); }
+  button.menu-btn.small { font-size: 15px; padding: 6px 12px; width: auto; }
+
+  /* Message panel like the game's dialogs. */
+  .panel {
+    width: min(560px, 100%); margin-top: 4vh; padding: 16px 20px;
+    background: var(--panel-fill);
+    border: 3px solid var(--rim-in); outline: 3px solid var(--rim-out);
+    box-shadow: 0 0 0 4px var(--frame), 0 10px 30px #000a;
+  }
+  .panel p { margin: 0 0 10px; }
+  .panel p:last-child { margin-bottom: 0; }
+  #status { text-shadow: var(--text-shadow);
+    font: 400 18px/1.3 var(--display); color: var(--heading); text-align: center;
+    letter-spacing: .03em; margin-bottom: 12px; }
+  #status.bad { color: var(--bad); }
+  .inset { background: var(--inset-fill);
+    box-shadow: inset 2px 2px 4px #0008, inset -1px -1px 0 #ffffff22;
+    padding: 10px 12px; margin-top: 10px; }
+  .help { color: var(--muted); font-size: .93em; }
+  .help b { color: var(--text); font-weight: 600; }
+  .bar { height: 12px; background: var(--bar-bg); box-shadow: inset 1px 1px 3px #000a; }
+  .bar > div { height: 100%; width: 0; background: var(--bar-fill); }
+  #progressText, #savesText, #syncText { color: var(--muted); font-size: .87em; margin-top: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #savesText:empty, #syncText:empty { display: none; }
+  #syncText.bad { color: var(--bad); white-space: normal; }
+  .footer { margin-top: 12px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  code { font-size: .87em; background: #0003; padding: 0 4px; }
+
+  #game { display: none; position: fixed; inset: 0; background: #000;
+    align-items: center; justify-content: center; }
+  #canvas { display: block; outline: none; image-rendering: var(--canvas-rendering); }
+  body.playing #setup { display: none; }
+  body.playing #game { display: flex; }
+  /* Shown while the game blocks the main thread. Only a transform animates,
+     so the browser keeps spinning it even then. */
+  #busy { position: fixed; left: 50%; top: 50%; z-index: 10; pointer-events: none;
+    transform: translate(-50%, -50%); display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font: 400 18px/1 var(--display); color: var(--heading);
+    background: var(--panel-fill); border: 2px solid var(--rim-in);
+    outline: 2px solid var(--rim-out); text-shadow: var(--text-shadow);
+    box-shadow: 0 6px 20px #000a; }
+  #busy[hidden] { display: none; }
+  /* A note over the running game, e.g. when saves stop syncing. */
+  #toast { position: fixed; left: 50%; top: 16px; z-index: 11; pointer-events: none;
+    transform: translateX(-50%); max-width: min(520px, calc(100vw - 32px));
+    padding: 10px 16px; font: var(--body-size)/1.4 var(--body);
+    color: var(--heading); text-align: center;
+    background: var(--panel-fill); border: 2px solid var(--rim-in);
+    outline: 2px solid var(--rim-out); text-shadow: var(--text-shadow);
+    box-shadow: 0 6px 20px #000a; }
+  #toast[hidden] { display: none; }
+  #busy .spinner { width: 20px; height: 20px; border-radius: 50%;
+    border: 3px solid var(--rim-in); border-top-color: var(--accent);
+    animation: spin .8s linear infinite; will-change: transform; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="setup">
+  <div class="title">
+    <h1>Augustus Web</h1>
+    <p class="sub">Caesar III</p>
+  </div>
+
+  <div class="menu">
+    <button class="menu-btn play" id="playBtn" disabled>Play</button>
+    <button class="menu-btn" id="pickBtn">Choose Game Folder</button>
+    <button class="menu-btn" id="serverBtn" hidden>Import From Local Server</button>
+    <input type="file" id="dirInput" webkitdirectory multiple hidden>
+    <div class="menu-group" id="savesCard" hidden>
+      <button class="menu-btn" id="downloadSavesBtn">Download Saves</button>
+      <button class="menu-btn" id="uploadSavesBtn">Upload Saves</button>
+      <input type="file" id="savesInput" accept=".zip,application/zip" hidden>
+    </div>
+  </div>
+
+  <div class="panel">
+    <p id="status">Loading engine…</p>
+    <div id="progressCard" class="inset" hidden>
+      <div class="bar"><div id="progress"></div></div>
+      <div id="progressText"></div>
+    </div>
+    <div class="inset help" id="importCard">
+      <p id="importHelp"></p>
+      <p id="savesHelp">Saves stay in this browser: download them to keep a backup or to move
+        them to another browser.</p>
+      <div id="syncText"></div>
+      <div id="savesText"></div>
+    </div>
+    <div class="footer">
+      <button class="menu-btn small" id="clearBtn" hidden>Remove Game Files From Browser</button>
+      <button class="menu-btn small" id="logoutBtn" hidden>Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<div id="game">
+  <canvas id="canvas" tabindex="-1"></canvas>
+  <div id="busy" hidden><div class="spinner"></div>Loading…</div>
+  <div id="toast" hidden></div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ---- This game -------------------------------------------------------------
+// Everything down to "Shared" is about Augustus. The rest of the page looks
+// and behaves the same in eZeus Web, Akhenaten Web and Augustus Web; unlike
+// those two, Augustus keeps the game files in IndexedDB and copies them into
+// the engine's in-memory file system when the game starts, so it also works
+// over plain http.
+const GAME_NAME = 'Augustus Web';
+const GAME_KEY = 'augustus';  // storage keys and file names
+// Augustus has touch controls, so phones and tablets are let in.
+const NEEDS_MOUSE = false;
+// Where the game folder is put in the engine's file system.
+const GAME_DIR = '/C3';
+const MAIN_ARGS = [GAME_DIR];
+const IMPORT_HELP = 'Choose your <b>Caesar III</b> folder (the one with <code>c3.sg2</code> ' +
+  'and <code>c3.eng</code>). The files are copied into this browser\'s storage, so this is ' +
+  'needed only once.';
+// Not needed by Augustus: installers, Windows binaries and manuals.
+// Keep in sync with web/gamefiles.py.
+const SKIP_RE = new RegExp('(\\.(exe|dll|pdf|lnk|url|ico|log|tmp)$)' +
+  '|(^|/)(unins[^/]*|goggame[^/]*)$|(^|/)(__support|__redist)/', 'i');
+// Saves found in the game folder are imported as the player's saves, not as
+// game files, unless this browser already has one of that name.
+const GAME_SAVE_RE = /\.(sav|svx)$/i;
+// What follows the player between browsers out of everything the game writes
+// into its folder: saves, maps and settings.
+const USER_FILE_RE = /\.(sav|svx|map|mapx|ini|inf)$/i;
+const ROOT_MARKERS = ['c3.sg2', 'c3.eng'];
+
+// Picks the files to import from everything in the chosen folder and gives
+// each its place in the game folder. Throws when the game is not in there.
+function planImport(all) {
+  // The game may sit in a subfolder of the chosen one: take the shallowest
+  // folder that has one of the markers.
+  let root = null;
+  for (const e of all) {
+    if (!ROOT_MARKERS.includes(e.parts[e.parts.length - 1].toLowerCase())) continue;
+    if (root === null || e.parts.length - 1 < root.length) root = e.parts.slice(0, -1);
+  }
+  if (root === null) {
+    throw new Error('c3.sg2 and c3.eng not found. Choose the Caesar III folder.');
+  }
+  const list = [];
+  for (const e of all) {
+    if (e.parts.length <= root.length || !root.every((d, i) => e.parts[i] === d)) continue;
+    const target = e.parts.slice(root.length);
+    if (!SKIP_RE.test(target.join('/'))) list.push({ ...e, target });
+  }
+  return list;
+}
+
+// ---- Shared ----------------------------------------------------------------
+const READY_MARKER = `.${GAME_KEY}-web-ready`;
+const GAME_VERSION_KEY = `${GAME_KEY}-game-version`;
+$('importHelp').innerHTML = IMPORT_HELP;
+
+// Phones and tablets get a notice instead of the engine and the game files
+// when the game cannot be played on them.
+const unsupported = NEEDS_MOUSE && (() => {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return ios || /Android/.test(ua) || !matchMedia('(any-pointer: fine)').matches;
+})();
+
+let runtimeReady = false;
+let filesReady = false;
+let importing = false;
+let playing = false;
+// Set when web/server.py answers api/config: { user, mode, sync }. The page is
+// behind a sign-in, the saves are kept on the server and, in "server" mode,
+// the game files come from it.
+let hosted = null;
+let savesSynced = false;
+// The list of game files the server offers, if any. They are only imported
+// on request.
+let serverFiles = null;
+
+function setStatus(text, bad) {
+  $('status').textContent = text;
+  $('status').classList.toggle('bad', !!bad);
+}
+
+function refreshButtons() {
+  if (unsupported) {
+    for (const id of ['playBtn', 'pickBtn', 'serverBtn', 'savesCard', 'importCard']) {
+      $(id).hidden = true;
+    }
+    // Lets a device that imported the files earlier free the space.
+    $('clearBtn').hidden = !filesReady;
+    setStatus(`This device is not supported. ${GAME_NAME} needs a computer with a mouse ` +
+      'and keyboard.', true);
+    return;
+  }
+  const waitingForSaves = !!(hosted && hosted.sync) && !savesSynced;
+  $('playBtn').disabled = !(runtimeReady && filesReady) || importing || waitingForSaves ||
+    playing;
+  $('clearBtn').hidden = !filesReady;
+  $('savesCard').hidden = !filesReady;
+  // Offer the server's game files when this browser has none, or older ones.
+  const fromServer = !!(hosted && hosted.mode === 'server');
+  const outdated = !!(serverFiles && serverFiles.version && fromServer &&
+    localStorage.getItem(GAME_VERSION_KEY) !== serverFiles.version);
+  $('serverBtn').hidden = !serverFiles || importing || (filesReady && !outdated) ||
+    !!(hosted && !fromServer);
+  if (serverFiles) {
+    const mb = Math.round(serverFiles.files.reduce((sum, f) => sum + f.size, 0) / 2 ** 20);
+    $('serverBtn').textContent = filesReady ? 'Update Game Files'
+      : fromServer ? `Import Game Files (${mb} MB)` : 'Import From Local Server';
+  }
+  if (!db) {
+    setStatus('This browser does not let the page store files (IndexedDB). Leave private ' +
+      'browsing or use another browser.', true);
+  } else if (importing) {
+    setStatus('Importing game files…');
+  } else if (!filesReady) {
+    setStatus(runtimeReady ? 'Engine ready. Now import the game files.' : 'Loading engine…');
+  } else if (waitingForSaves) {
+    setStatus('Syncing saves…');
+  } else {
+    setStatus(runtimeReady ? 'Ready.' : 'Loading engine…');
+  }
+}
+
+// This browser's storage, in IndexedDB. "files" has one record per game file,
+// keyed by its path in the game folder; "saves" has the player's own files
+// (see further down); "meta" holds the ready marker, the sizes of the
+// imported files and the sync state.
+const DB_NAME = `${GAME_KEY}-web`;
+let db = null;
+let sizes = {};  // path -> size
+
+const request = r => new Promise((resolve, reject) => {
+  r.onsuccess = () => resolve(r.result);
+  r.onerror = () => reject(r.error);
+});
+const finished = tx => new Promise((resolve, reject) => {
+  tx.oncomplete = () => resolve();
+  tx.onerror = tx.onabort = () => reject(tx.error || new Error('storage transaction aborted'));
+});
+
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const r = indexedDB.open(DB_NAME, 3);
+    r.onupgradeneeded = e => {
+      const d = r.result;
+      for (const store of ['files', 'meta', 'saves']) {
+        if (!d.objectStoreNames.contains(store)) d.createObjectStore(store);
+      }
+      // Version 1 had no marker: a browser with the game in it stays ready.
+      if (e.oldVersion === 1) {
+        const tx = r.transaction;
+        tx.objectStore('files').count().onsuccess = ev => {
+          if (ev.target.result > 50) {
+            tx.objectStore('meta').put(new Date().toISOString(), READY_MARKER);
+          }
+        };
+      }
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+
+const metaGet = key => request(db.transaction('meta').objectStore('meta').get(key));
+function metaPut(key, value) {
+  const tx = db.transaction('meta', 'readwrite');
+  tx.objectStore('meta').put(value, key);
+  return finished(tx);
+}
+
+async function checkReady() {
+  try {
+    filesReady = !!(await metaGet(READY_MARKER));
+    sizes = (await metaGet('sizes')) || {};
+  } catch (e) { filesReady = false; }
+  refreshButtons();
+}
+
+async function* walkHandle(dir, prefix) {
+  for await (const [name, handle] of dir.entries()) {
+    const parts = [...prefix, name];
+    if (handle.kind === 'directory') yield* walkHandle(handle, parts);
+    else yield { parts, getFile: () => handle.getFile() };
+  }
+}
+
+function* walkInput(files) {
+  for (const f of files) {
+    // webkitRelativePath starts with the chosen folder name; drop it.
+    const parts = f.webkitRelativePath.split('/').slice(1);
+    yield { parts, getFile: async () => f };
+  }
+}
+
+async function importFiles(entries) {
+  const all = [];
+  for await (const e of entries) all.push(e);
+  const list = planImport(all);
+
+  $('progressCard').hidden = false;
+  $('pickBtn').disabled = true;
+  // A previous import may have been partial: drop the marker until done.
+  const drop = db.transaction('meta', 'readwrite');
+  drop.objectStore('meta').delete(READY_MARKER);
+  await finished(drop);
+
+  const files = await Promise.all(list.map(async e => ({ ...e, file: await e.getFile() })));
+  const total = files.reduce((s, e) => s + e.file.size, 0);
+  let done = 0;
+
+  async function copy(e) {
+    const path = e.target.join('/');
+    if (GAME_SAVE_RE.test(path)) {
+      // Never replace saves made in the browser with ones from the folder.
+      if (!localSaves.has(path)) {
+        await writeLocalSave(path, new Uint8Array(await e.file.arrayBuffer()),
+          e.file.lastModified || Date.now());
+      }
+    } else if (sizes[path] !== e.file.size) {
+      // Otherwise a file of that size is already there: an update only
+      // fetches what changed.
+      const data = new Uint8Array(await e.file.arrayBuffer());
+      const tx = db.transaction('files', 'readwrite');
+      tx.objectStore('files').put(data, path);
+      await finished(tx);
+      sizes[path] = data.length;
+    }
+    done += e.file.size;
+    $('progress').style.width = (total ? 100 * done / total : 100) + '%';
+    $('progressText').textContent =
+      `${(done / 2 ** 20).toFixed(0)} / ${(total / 2 ** 20).toFixed(0)} MB — ${path}`;
+  }
+  // Most files are small, so copy several at once.
+  const queue = files.slice();
+  try {
+    await Promise.all(Array.from({ length: 4 }, async () => {
+      while (queue.length) await copy(queue.shift());
+    }));
+  } finally {
+    await metaPut('sizes', sizes);
+  }
+  await metaPut(READY_MARKER, new Date().toISOString());
+  $('progressText').textContent = `Done: ${files.length} files.`;
+  $('pickBtn').disabled = false;
+}
+
+async function runImport(entries) {
+  importing = true;
+  refreshButtons();
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+    await importFiles(entries);
+  } catch (e) {
+    importing = false;
+    console.error(e);
+    refreshButtons();
+    setStatus(e.message || String(e), true);
+    $('pickBtn').disabled = false;
+    return;
+  }
+  importing = false;
+  await checkReady();
+}
+
+$('pickBtn').addEventListener('click', async () => {
+  if (window.showDirectoryPicker) {
+    let dir;
+    try { dir = await showDirectoryPicker({ id: GAME_KEY, mode: 'read' }); }
+    catch (e) { return; }
+    runImport(withExtras(walkHandle(dir, [])));
+  } else {
+    $('dirInput').click();
+  }
+});
+async function* walkServer(manifest) {
+  for (const f of manifest.files) {
+    const url = 'game/' + f.path.split('/').map(encodeURIComponent).join('/');
+    yield { parts: f.path.split('/'), getFile: async () => {
+      // Only .size and .arrayBuffer() are used.
+      return { size: f.size, arrayBuffer: async () => {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${f.path}`);
+        return r.arrayBuffer();
+      } };
+    } };
+  }
+}
+
+$('serverBtn').addEventListener('click', async () => {
+  try {
+    serverFiles = await (await fetch('game-manifest.json')).json();
+  } catch (e) {
+    setStatus('The server cannot be reached.', true);
+    return;
+  }
+  await runImport(walkServer(serverFiles));
+  if (filesReady && serverFiles.version) {
+    localStorage.setItem(GAME_VERSION_KEY, serverFiles.version);
+  }
+  refreshButtons();
+});
+
+$('dirInput').addEventListener('change', e => runImport(withExtras(walkInput(e.target.files))));
+
+// The chosen folder plus, with the local game source, the files the server
+// has for the engine to find in it.
+async function* withExtras(entries) {
+  yield* entries;
+  if (hosted && hosted.mode !== 'server' && serverFiles) yield* walkServer(serverFiles);
+}
+
+$('clearBtn').addEventListener('click', async () => {
+  if (!confirm(hosted
+      ? 'Remove the game files and the copies of the saves from this browser? ' +
+        'The saves on the server are kept.'
+      : 'Remove the imported game files and saves from this browser? ' +
+        'Download your saves first to keep them.')) return;
+  const tx = db.transaction(['files', 'meta', 'saves'], 'readwrite');
+  for (const store of ['files', 'meta', 'saves']) tx.objectStore(store).clear();
+  await finished(tx);
+  localStorage.removeItem(GAME_VERSION_KEY);
+  location.reload();
+});
+
+// Minimal ZIP support for the saves archive: writes stored (uncompressed)
+// entries and reads stored or deflated ones, so archives repacked by other
+// tools load too.
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xffffffff;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+// entries: [{ name, data: Uint8Array }]; a name ending in '/' is a folder.
+function makeZip(entries) {
+  const enc = new TextEncoder();
+  const now = new Date();
+  const time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+  const date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const chunks = [], central = [];
+  let offset = 0;
+  for (const e of entries) {
+    const name = enc.encode(e.name);
+    const data = e.data || new Uint8Array(0);
+    const crc = crc32(data);
+    const local = new DataView(new ArrayBuffer(30));
+    local.setUint32(0, 0x04034b50, true);
+    local.setUint16(4, 20, true);
+    local.setUint16(6, 0x0800, true); // UTF-8 names
+    local.setUint16(10, time, true);
+    local.setUint16(12, date, true);
+    local.setUint32(14, crc, true);
+    local.setUint32(18, data.length, true);
+    local.setUint32(22, data.length, true);
+    local.setUint16(26, name.length, true);
+    chunks.push(new Uint8Array(local.buffer), name, data);
+
+    const cd = new DataView(new ArrayBuffer(46));
+    cd.setUint32(0, 0x02014b50, true);
+    cd.setUint16(4, 20, true);
+    cd.setUint16(6, 20, true);
+    cd.setUint16(8, 0x0800, true);
+    cd.setUint16(12, time, true);
+    cd.setUint16(14, date, true);
+    cd.setUint32(16, crc, true);
+    cd.setUint32(20, data.length, true);
+    cd.setUint32(24, data.length, true);
+    cd.setUint16(28, name.length, true);
+    cd.setUint32(38, e.name.endsWith('/') ? 0x10 : 0, true); // MS-DOS folder flag
+    cd.setUint32(42, offset, true);
+    central.push(new Uint8Array(cd.buffer), name);
+    offset += 30 + name.length + data.length;
+  }
+  const cdSize = central.reduce((s, c) => s + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, entries.length, true);
+  end.setUint16(10, entries.length, true);
+  end.setUint32(12, cdSize, true);
+  end.setUint32(16, offset, true);
+  return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], { type: 'application/zip' });
+}
+
+async function readZip(buffer) {
+  const view = new DataView(buffer);
+  let eocd = -1;
+  for (let i = buffer.byteLength - 22; i >= Math.max(0, buffer.byteLength - 65557); i--) {
+    if (view.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('Not a ZIP archive.');
+  const count = view.getUint16(eocd + 10, true);
+  let p = view.getUint32(eocd + 16, true);
+  const dec = new TextDecoder();
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    if (view.getUint32(p, true) !== 0x02014b50) throw new Error('Damaged ZIP archive.');
+    const method = view.getUint16(p + 10, true);
+    const csize = view.getUint32(p + 20, true);
+    const nameLen = view.getUint16(p + 28, true);
+    const extraLen = view.getUint16(p + 30, true);
+    const commentLen = view.getUint16(p + 32, true);
+    const local = view.getUint32(p + 42, true);
+    const name = dec.decode(new Uint8Array(buffer, p + 46, nameLen));
+    p += 46 + nameLen + extraLen + commentLen;
+    if (name.endsWith('/')) { out.push({ name }); continue; }
+    const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
+    const raw = new Uint8Array(buffer, start, csize);
+    let data;
+    if (method === 0) data = raw.slice();
+    else if (method === 8) {
+      const stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      data = new Uint8Array(await new Response(stream).arrayBuffer());
+    } else throw new Error(`Unsupported compression in ${name}.`);
+    out.push({ name, data });
+  }
+  return out;
+}
+
+// SHA-256 of a Uint8Array as hex. Browsers only offer crypto.subtle on https
+// and localhost, and this page also has to work over plain http.
+const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+const firstPrimes = count => {
+  const out = [];
+  for (let c = 2; out.length < count; c++) {
+    let prime = true;
+    for (let d = 2; d * d <= c; d++) if (c % d === 0) { prime = false; break; }
+    if (prime) out.push(c);
+  }
+  return out;
+};
+const SHA_K = firstPrimes(64).map(p => ((Math.cbrt(p) % 1) * 2 ** 32) >>> 0);
+const SHA_H = firstPrimes(8).map(p => ((Math.sqrt(p) % 1) * 2 ** 32) >>> 0);
+
+function sha256Plain(bytes) {
+  const h = SHA_H.slice();
+  const padded = new Uint8Array(((bytes.length + 9 + 63) >> 6) << 6);
+  padded.set(bytes);
+  padded[bytes.length] = 0x80;
+  const view = new DataView(padded.buffer);
+  view.setUint32(padded.length - 8, Math.floor(bytes.length / 2 ** 29));
+  view.setUint32(padded.length - 4, (bytes.length << 3) >>> 0);
+  const w = new Uint32Array(64);
+  for (let o = 0; o < padded.length; o += 64) {
+    for (let i = 0; i < 16; i++) w[i] = view.getUint32(o + i * 4);
+    for (let i = 16; i < 64; i++) {
+      const x = w[i - 15], y = w[i - 2];
+      w[i] = w[i - 16] + (rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3)) + w[i - 7] +
+        (rotr(y, 17) ^ rotr(y, 19) ^ (y >>> 10));
+    }
+    let [a, b, c, d, e, f, g, k] = h;
+    for (let i = 0; i < 64; i++) {
+      const t1 = k + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) +
+        SHA_K[i] + w[i];
+      const t2 = (rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c));
+      k = g; g = f; f = e; e = (d + t1) >>> 0; d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    [a, b, c, d, e, f, g, k].forEach((v, i) => { h[i] = (h[i] + v) >>> 0; });
+  }
+  return h.map(v => v.toString(16).padStart(8, '0')).join('');
+}
+
+async function sha256(bytes) {
+  if (!(window.crypto && crypto.subtle)) return sha256Plain(bytes);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// The saves in this browser: the "saves" store, one record per file, keyed by
+// its path in the game folder. localSaves mirrors it without the contents.
+const localSaves = new Map();  // path -> { size, mtime, hash }
+
+async function loadLocalSaves() {
+  const records = [];
+  const tx = db.transaction('saves');
+  const cursor = tx.objectStore('saves').openCursor();
+  cursor.onsuccess = () => {
+    const c = cursor.result;
+    if (!c) return;
+    records.push([c.key, c.value]);
+    c.continue();
+  };
+  await finished(tx);
+  localSaves.clear();
+  for (const [path, r] of records) {
+    localSaves.set(path, { size: r.data.length, mtime: r.mtime, hash: r.hash });
+  }
+}
+
+const readLocalSave = path => request(db.transaction('saves').objectStore('saves').get(path));
+
+async function writeLocalSave(path, data, mtime) {
+  const hash = await sha256(data);
+  const tx = db.transaction('saves', 'readwrite');
+  tx.objectStore('saves').put({ data, mtime, hash }, path);
+  await finished(tx);
+  localSaves.set(path, { size: data.length, mtime, hash });
+}
+
+async function removeLocalSave(path) {
+  const tx = db.transaction('saves', 'readwrite');
+  tx.objectStore('saves').delete(path);
+  await finished(tx);
+  localSaves.delete(path);
+}
+
+$('downloadSavesBtn').addEventListener('click', async () => {
+  try {
+    const entries = [];
+    for (const path of [...localSaves.keys()].sort()) {
+      entries.push({ name: 'Save/' + path, data: (await readLocalSave(path)).data });
+    }
+    if (!entries.length) {
+      $('savesText').textContent = 'There are no saves yet.';
+      return;
+    }
+    const url = URL.createObjectURL(makeZip(entries));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${GAME_KEY}-saves-${new Date().toISOString().slice(0, 10)}.zip`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    $('savesText').textContent = `Downloaded ${entries.length} save files.`;
+  } catch (e) {
+    console.error(e);
+    $('savesText').textContent = 'Could not download saves: ' + (e.message || e);
+  }
+});
+
+$('uploadSavesBtn').addEventListener('click', () => $('savesInput').click());
+$('savesInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const entries = await readZip(await file.arrayBuffer());
+    let added = 0;
+    for (const entry of entries) {
+      // Accept archives with or without the top-level Save folder.
+      let parts = entry.name.split('/').filter(Boolean);
+      if (parts[0] && parts[0].toLowerCase() === 'save') parts = parts.slice(1);
+      if (!entry.data || !parts.length || !USER_FILE_RE.test(parts[parts.length - 1])) continue;
+      if (parts.some(p => p === '.' || p === '..' || p.includes('\\'))) continue;
+      await writeLocalSave(parts.join('/'), entry.data, Date.now());
+      added++;
+    }
+    $('savesText').textContent = added ? `Uploaded ${added} save files.`
+                                       : 'The archive has no save files.';
+    if (hosted && hosted.sync) runSync(true);
+  } catch (err) {
+    console.error(err);
+    $('savesText').textContent = 'Could not upload saves: ' + (err.message || err);
+  }
+});
+
+// Saves sync with web/server.py, the same way as in eZeus Web and Akhenaten
+// Web. The saves live in the "saves" store of this browser; the page copies
+// changes both ways. SYNC_BASE remembers what both sides had after the last
+// sync, which tells a save deleted here from one added there.
+const SYNC_BASE = 'sync-base';
+class SignedOutError extends Error {}
+
+async function api(method, url, options) {
+  const r = await fetch(url, { method, ...options });
+  if (r.status === 401) throw new SignedOutError('signed out');
+  if (!r.ok) throw new Error(`${method} ${url}: HTTP ${r.status}`);
+  return r;
+}
+const saveUrl = (path, query) =>
+  'api/saves/' + path.split('/').map(encodeURIComponent).join('/') + (query || '');
+
+// One sync pass. A full pass also brings server changes into this browser;
+// while the game runs only its own changes are sent, so files are not swapped
+// under it. Returns true when the server has changes this browser lacks.
+// Folders are not tracked: the game keeps its saves by file.
+async function syncSavesOnce(full) {
+  const remote = new Map((await (await api('GET', 'api/saves')).json()).saves
+    .filter(e => !e.dir).map(e => [e.path, e]));
+  let base = (await metaGet(SYNC_BASE)) || {};
+  // A browser whose storage was cleared must not look like one where every
+  // save was deleted on purpose.
+  if (localSaves.size === 0) base = {};
+  const paths = [...new Set([...localSaves.keys(), ...remote.keys(), ...Object.keys(base)])]
+    .sort();
+  let behind = false;
+
+  for (const p of paths) {
+    const l = localSaves.get(p), r = remote.get(p), b = base[p];
+    const lh = l ? l.hash : null, rh = r ? r.sha256 : null, bh = b ? b.hash : null;
+    if (lh === rh) {
+      if (lh) base[p] = { hash: lh }; else delete base[p];
+      continue;
+    }
+    const localChanged = lh !== bh, remoteChanged = rh !== bh;
+    let send;
+    if (localChanged && !remoteChanged) send = true;
+    else if (!localChanged && remoteChanged) send = false;
+    else if (!l) send = false;            // deleted here, changed there: keep it
+    else if (!r) send = true;             // changed here, deleted there: keep it
+    else send = l.mtime >= r.mtime;       // both changed: newer wins
+    const upload = async query => api('PUT', saveUrl(p, query), {
+      body: (await readLocalSave(p)).data,
+      headers: { 'X-Mtime': String(Math.round(l.mtime)) } });
+    if (send) {
+      if (l) {
+        await upload();
+        base[p] = { hash: lh };
+      } else {
+        await api('DELETE', saveUrl(p));
+        delete base[p];
+      }
+    } else if (!full) {
+      behind = true;
+    } else if (r) {
+      // The copy that loses is kept on the server as an older version.
+      if (l && localChanged) await upload('?version=1');
+      const data = new Uint8Array(await (await api('GET', saveUrl(p))).arrayBuffer());
+      await writeLocalSave(p, data, r.mtime);
+      base[p] = { hash: rh };
+    } else {
+      await removeLocalSave(p);
+      delete base[p];
+    }
+  }
+  await metaPut(SYNC_BASE, base);
+  return behind;
+}
+
+let syncing = false, syncQueued = null, toastTimer = 0;
+function showToast(text, sticky) {
+  $('toast').textContent = text;
+  $('toast').hidden = false;
+  clearTimeout(toastTimer);
+  if (!sticky) toastTimer = setTimeout(() => { $('toast').hidden = true; }, 8000);
+}
+
+function setSyncNote(text, bad) {
+  $('syncText').textContent = text;
+  $('syncText').classList.toggle('bad', !!bad);
+}
+
+let signedOut = false, behindWarned = false;
+async function runSync(full) {
+  if (signedOut) return;
+  if (syncing) { syncQueued = syncQueued || full; return; }
+  syncing = true;
+  const playing = document.body.classList.contains('playing');
+  try {
+    // Never pull while the game runs, whatever the caller asked for.
+    const behind = await syncSavesOnce(full && !playing);
+    setSyncNote('Saves synced with the server at ' + new Date().toLocaleTimeString() + '.');
+    if (behind && playing && !behindWarned) {
+      behindWarned = true;
+      showToast('Saves were changed from another browser. Reload the page to get them.');
+    }
+  } catch (e) {
+    if (e instanceof SignedOutError) {
+      signedOut = true;
+      setSyncNote('You are signed out. Reload the page to sign in; saves are not syncing.', true);
+      if (playing) showToast('Signed out: saves are no longer syncing. Reload the page.', true);
+    } else {
+      console.warn(e);
+      setSyncNote('Saves are not synced (the server cannot be reached). Retrying.', true);
+    }
+  }
+  syncing = false;
+  if (syncQueued !== null) {
+    const again = syncQueued;
+    syncQueued = null;
+    return runSync(again);
+  }
+}
+
+async function startSync() {
+  await runSync(true);
+  savesSynced = true;
+  refreshButtons();
+  setInterval(() => runSync(true), 20000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') runSync(false);
+  });
+}
+
+function applyHosting() {
+  if (!hosted) return;
+  $('logoutBtn').hidden = false;
+  $('savesHelp').textContent = 'Saves are kept on this server and follow you to every ' +
+    'browser you sign in from.';
+  if (hosted.mode === 'server') {
+    $('pickBtn').hidden = true;
+    $('importHelp').textContent = 'The game files come from this server. Importing copies ' +
+      'them into this browser\'s storage; it is needed once per browser.';
+  }
+}
+
+$('logoutBtn').addEventListener('click', async () => {
+  try { await fetch('api/logout', { method: 'POST' }); } catch (e) {}
+  location.href = 'login';
+});
+
+// The engine works in a file system in memory. Before the game starts the
+// page copies the imported game files and the saves into it, and afterwards
+// copies back to the "saves" store what the game writes there.
+function gameFS() { return Module.FS || window.FS; }
+
+// path -> "size:mtime" of every file in the game folder.
+function scanGameDir() {
+  const FS = gameFS();
+  const out = {};
+  (function walk(dir, prefix) {
+    for (const name of FS.readdir(dir)) {
+      if (name === '.' || name === '..') continue;
+      const st = FS.stat(dir + '/' + name);
+      if (FS.isDir(st.mode)) walk(dir + '/' + name, prefix + name + '/');
+      else if (FS.isFile(st.mode)) out[prefix + name] = st.size + ':' + new Date(st.mtime).getTime();
+    }
+  })(GAME_DIR, '');
+  return out;
+}
+
+let snapshot = null;
+async function loadGameDir() {
+  const FS = gameFS();
+  const made = new Set();
+  const mkdirs = dir => {
+    let cur = '';
+    for (const p of dir.split('/').filter(Boolean)) {
+      cur += '/' + p;
+      if (made.has(cur)) continue;
+      try { FS.mkdir(cur); } catch (e) {}
+      made.add(cur);
+    }
+  };
+  const put = (path, data, canOwn, mtime) => {
+    const full = GAME_DIR + '/' + path;
+    mkdirs(full.slice(0, full.lastIndexOf('/')));
+    try {
+      FS.writeFile(full, data, { canOwn });
+      if (mtime) FS.utime(full, mtime, mtime);
+    } catch (e) { console.warn(path, e); }
+  };
+  mkdirs(GAME_DIR);
+  const tx = db.transaction(['files', 'saves']);
+  const files = tx.objectStore('files').openCursor();
+  files.onsuccess = () => {
+    const c = files.result;
+    if (!c) return;
+    // The engine takes the record's memory over instead of copying it.
+    put(c.key, c.value instanceof Uint8Array ? c.value : new Uint8Array(c.value), true);
+    c.continue();
+  };
+  // After the game files, so a save replaces a game file of the same name.
+  const saved = tx.objectStore('saves').openCursor();
+  saved.onsuccess = () => {
+    const c = saved.result;
+    if (!c) return;
+    put(c.key, c.value.data, true, c.value.mtime);
+    c.continue();
+  };
+  await finished(tx);
+  snapshot = scanGameDir();
+}
+
+// Copies what the game wrote or removed since the last time to the "saves"
+// store. Only the player's own files are kept: saves, maps and settings, not
+// screenshots or logs.
+async function captureSaves() {
+  const FS = gameFS();
+  const now = scanGameDir();
+  for (const [path, stamp] of Object.entries(now)) {
+    if (snapshot[path] === stamp) continue;
+    snapshot[path] = stamp;
+    if (!USER_FILE_RE.test(path)) continue;
+    await writeLocalSave(path, FS.readFile(GAME_DIR + '/' + path), Number(stamp.split(':')[1]));
+  }
+  for (const path of Object.keys(snapshot)) {
+    if (path in now) continue;
+    delete snapshot[path];
+    if (localSaves.has(path)) await removeLocalSave(path);
+  }
+}
+
+// One capture at a time, in the order they were asked for.
+let captureChain = Promise.resolve(), captureTimer = 0;
+function savesChanged() {
+  captureChain = captureChain.then(async () => {
+    if (!snapshot) return;
+    try { await captureSaves(); } catch (e) { console.warn(e); return; }
+    if (hosted && hosted.sync) await runSync(false);
+  });
+  return captureChain;
+}
+
+// Back to the start page after the engine stopped; it cannot be started twice.
+function leaveGame(text) {
+  runtimeReady = false;
+  playing = false;
+  $('busy').hidden = true;
+  document.body.classList.remove('playing');
+  refreshButtons();
+  setStatus(text, true);
+}
+
+function gameStopped(what) {
+  console.error(what);
+  leaveGame(`The game crashed: ${what}. Reload the page to try again.`);
+}
+
+$('playBtn').addEventListener('click', async () => {
+  if (playing) return;
+  playing = true;
+  document.body.classList.add('playing');
+  $('busy').hidden = false;
+  try {
+    await loadGameDir();
+  } catch (e) {
+    console.error(e);
+    playing = false;
+    $('busy').hidden = true;
+    document.body.classList.remove('playing');
+    refreshButtons();
+    setStatus('The game files could not be loaded: ' + (e.message || e) + '.', true);
+    return;
+  }
+  $('busy').hidden = true;
+  $('canvas').focus();
+  try {
+    Module.callMain(MAIN_ARGS);
+  } catch (e) {
+    // A WebAssembly trap is not an abort(), so onAbort never sees it.
+    gameStopped(e.message || e);
+  }
+});
+
+$('canvas').addEventListener('contextmenu', e => e.preventDefault());
+
+var Module = {
+  canvas: $('canvas'),
+  print: (...a) => console.log(...a),
+  printErr: (...a) => console.warn(...a),
+  onRuntimeInitialized() { runtimeReady = true; refreshButtons(); },
+  onAbort(what) { gameStopped(what); },
+  // Called by the game right after it writes a file.
+  syncFS() {
+    clearTimeout(captureTimer);
+    captureTimer = setTimeout(savesChanged, 250);
+  },
+  // Called by the game when it ends; a status means it could not start.
+  quitGame(status) {
+    if (status) {
+      leaveGame('The game could not start: the game files are incomplete. Remove them ' +
+        'from the browser and import them again.');
+    } else {
+      // The saves are in this browser's storage by then, so nothing is lost
+      // if the server cannot be reached right now.
+      clearTimeout(captureTimer);
+      savesChanged().then(() => location.reload());
+    }
+  },
+};
+
+// Start-up. The engine is loaded only after the page knows what it is served
+// by; when the server offers the game files, the page shows a button to import
+// them, and nothing that large is downloaded without being asked for.
+(async () => {
+  try {
+    db = await openDb();
+    await loadLocalSaves();
+  } catch (e) { console.warn(e); db = null; }
+  if (db) await checkReady();
+  try {
+    const r = await fetch('api/config');
+    if (r.ok) hosted = await r.json();
+  } catch (e) {}
+  applyHosting();
+  refreshButtons();
+  if (unsupported || !db) return;
+  document.body.appendChild($('engine').content.cloneNode(true));
+  if (hosted && hosted.sync) startSync();
+
+  let manifest = null;
+  try {
+    const r = await fetch('game-manifest.json');
+    if (r.ok) manifest = await r.json();
+  } catch (e) {}
+  serverFiles = manifest;
+  refreshButtons();
+})();
+</script>
+<template id="engine">{{{ SCRIPT }}}</template>
+</body>
+</html>

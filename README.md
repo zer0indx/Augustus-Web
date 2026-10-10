@@ -2,7 +2,7 @@
 
 Augustus Web is a browser (WebAssembly) port of [Augustus](https://github.com/Keriew/augustus), the open-source Caesar III engine with gameplay enhancements by Keriew and contributors.
 
-The engine is compiled with Emscripten and runs in a desktop browser. It ships as a self-hosted Docker service: a small Node.js server can put the game behind a sign-in, hands the game files to the browser and keeps your saves, so a city started on one computer can be continued on another.
+The engine is compiled with Emscripten and runs in a desktop browser. It ships as a self-hosted Docker service: a small Python server puts the game behind a sign-in, hands the game files to the browser and keeps your saves, so a city started on one computer can be continued on another.
 
 No game files are included. You need your own copy of Caesar III ([GOG](https://www.gog.com/game/caesar_3), [Steam](https://store.steampowered.com/app/517790/Caesar_3/)); on the first launch they are copied once into the browser's storage (IndexedDB).
 
