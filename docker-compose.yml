@@ -8,11 +8,11 @@
 name: augustus
 services:
   augustus-web:
-    # The published image when there is one for this name, otherwise built
-    # from this checkout. To run your own changes: docker compose up -d --build
-    image: ghcr.io/zer0indx/augustus-web:latest
+    # Built from this checkout; "docker compose up -d" rebuilds it when the
+    # sources change. To deploy it through Portainer see deploy/portainer.py.
+    image: augustus-web:latest
     build: .
-    pull_policy: missing
+    pull_policy: build
     container_name: augustus-web
     restart: unless-stopped
     ports:
@@ -36,7 +36,7 @@ services:
       - ${AUGUSTUS_GAME_PATH:-./game}:/game:ro
     # The container runs as user 1000. With a host folder in AUGUSTUS_DATA_PATH
     # that this user cannot write to, set the folder's owner here
-    # (e.g. Synology "1026:100").
+    # (e.g. "1026:100").
     # user: "1026:100"
 
 volumes:

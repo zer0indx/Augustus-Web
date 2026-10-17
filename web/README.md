@@ -1,6 +1,6 @@
 # Augustus Web
 
-The web version of [Augustus](https://github.com/Keriew/augustus): the engine compiled to WebAssembly with Emscripten, a start page and a small Python server (`server.py`, standard library only) packaged as one Docker image. It is meant for self-hosting, for example on a NAS, and playing from a browser.
+The web version of [Augustus](https://github.com/Keriew/augustus): the engine compiled to WebAssembly with Emscripten, a start page and a small Python server (`server.py`, standard library only) packaged as one Docker image. It is meant for self-hosting and playing from a browser.
 
 No game files are included. The original **Caesar III** files (GOG, Steam or CD) are required.
 
@@ -23,13 +23,11 @@ docker compose up -d --build
 
 Then open `http://<host-ip>:8080`.
 
-The first build compiles the engine and takes several minutes. The wasm build stage runs on the build machine's native architecture, so cross-building for an ARM NAS is cheap:
+The first build compiles the engine and takes several minutes. The wasm build stage runs on the build machine's native architecture, so cross-building for an ARM host is cheap:
 
 ```bash
 docker buildx build --platform linux/arm64 -t augustus-web .
 ```
-
-The GitHub workflow in `.github/workflows/docker.yml` publishes the image as `ghcr.io/zer0indx/augustus-web`: a `web-v1.2` git tag gives the image tags `1.2` and `latest`, a manual run gives `edge`. `docker compose up -d` without `--build` uses the published image when there is one.
 
 ## Settings (`.env`)
 
@@ -85,6 +83,55 @@ Earlier versions of Augustus Web had a Node.js server with other variable names 
 | `SAVES_PATH` | `AUGUSTUS_DATA_PATH`, optional. To bring your saves over, zip them and use **Upload Saves** on the start page, or set `AUGUSTUS_DATA_PATH` to a folder and put them into its `saves/` subfolder |
 | `AUGUSTUS_PORT` | `AUGUSTUS_HTTP_PORT` |
 | `TRUST_PROXY` | `AUGUSTUS_TRUST_PROXY` |
+
+## Deploying with Portainer
+
+`deploy/portainer.py` builds the image on your computer, uploads it to a
+Portainer environment and creates or updates the `augustus` stack from
+`deploy/portainer-stack.yml`. No registry is involved and nothing is compiled
+on the server. You need Docker and Python 3.8 or later on the computer and
+Portainer managing the Docker host that will run the game.
+
+1. In Portainer create an access token: **My account → Access tokens → Add
+   access token**.
+2. On the Docker host create a folder for the saves and one for the game
+   files, for example `/srv/augustus/data` and `/srv/augustus/game`, and copy
+   your Caesar III folder into the second one. Note the user and group that own
+   the folders (`id` on the host shows yours).
+3. Set in `.env`:
+
+   | Variable | Value |
+   |---|---|
+   | `PORTAINER_URL` | Portainer address, e.g. `http://192.168.1.10:9000` |
+   | `PORTAINER_TOKEN` | The access token |
+   | `PORTAINER_ENDPOINT_ID` | Optional: the Portainer environment. Default: the first Docker environment that is up |
+   | `AUGUSTUS_DEPLOY_DATA_PATH` | The saves folder on the Docker host |
+   | `AUGUSTUS_DEPLOY_GAME_PATH` | The game folder on the Docker host |
+   | `AUGUSTUS_DEPLOY_HTTP_PORT` | Port on the Docker host |
+   | `AUGUSTUS_DEPLOY_RUN_AS` | `uid:gid` that owns both folders, e.g. `1000:1000` |
+
+   The other `AUGUSTUS_*` settings (sign-in name, password and so on) are used as
+   they are. `AUGUSTUS_DEPLOY_*` apply to the deployed stack only, so the same
+   `.env` keeps working for `docker compose up` on your computer. `.env` is
+   not committed; keep the token there.
+4. Deploy:
+
+   ```bash
+   python deploy/portainer.py --dry-run   # shows the stack and its settings, changes nothing
+   python deploy/portainer.py
+   ```
+
+   Run it again after pulling new changes to update the stack; the saves stay
+   in the data folder. `--no-build` uploads the image that is already built,
+   e.g. one made for an ARM host with
+   `docker buildx build --platform linux/arm64 -t augustus-web:latest --load .`
+5. Put a reverse proxy with HTTPS in front of that port and open the site.
+
+Without the script: build the image (`docker build -t augustus-web:latest .`),
+save it (`docker save augustus-web:latest -o augustus-web.tar`), load it on the Docker
+host (`docker load -i augustus-web.tar`, or **Images → Import** in Portainer), then
+start `deploy/portainer-stack.yml` with its variables set, as a Portainer
+stack or with `docker compose -f deploy/portainer-stack.yml up -d`.
 
 ## Playing
 

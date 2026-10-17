@@ -6,7 +6,7 @@
 #   docker compose up -d --build
 #
 # The wasm build stage always runs on the build machine's native architecture
-# (the output is platform independent), so cross-building for ARM NAS boxes is cheap:
+# (the output is platform independent), so cross-building for ARM hosts is cheap:
 #   docker buildx build --platform linux/arm64 -t augustus-web .
 
 # The version Augustus's own CI builds with (.ci_scripts/setup_environment.sh).

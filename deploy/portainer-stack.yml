@@ -1,0 +1,25 @@
+# Stack for Portainer, created and updated by deploy/portainer.py.
+# It runs the image that the script built and uploaded (augustus-web:latest):
+# nothing is pulled from a registry or built on the server.
+# The ${...} values come from .env, AUGUSTUS_DEPLOY_* taking precedence.
+services:
+  augustus-web:
+    image: augustus-web:latest
+    pull_policy: never
+    container_name: augustus-web
+    restart: unless-stopped
+    # Owner of the host folders below, as uid:gid ("id" on the host shows yours).
+    user: "${AUGUSTUS_RUN_AS:-1000:1000}"
+    ports:
+      - "${AUGUSTUS_HTTP_PORT:-8080}:8080"
+    environment:
+      AUGUSTUS_USER: ${AUGUSTUS_USER:-caesar}
+      AUGUSTUS_PASSWORD: ${AUGUSTUS_PASSWORD:?set AUGUSTUS_PASSWORD (at least 9 characters)}
+      AUGUSTUS_GAME_SOURCE: ${AUGUSTUS_GAME_SOURCE:-server}
+      AUGUSTUS_SESSION_DAYS: ${AUGUSTUS_SESSION_DAYS:-30}
+      AUGUSTUS_TRUST_PROXY: ${AUGUSTUS_TRUST_PROXY:-0}
+    volumes:
+      # Saves, their older versions and the session secret.
+      - ${AUGUSTUS_DATA_PATH:?set AUGUSTUS_DEPLOY_DATA_PATH, e.g. /srv/augustus/data}:/data
+      # Your Caesar III folder (the one with c3.sg2, c3.eng).
+      - ${AUGUSTUS_GAME_PATH:?set AUGUSTUS_DEPLOY_GAME_PATH, e.g. /srv/augustus/game}:/game:ro
