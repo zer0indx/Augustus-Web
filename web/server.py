@@ -7,7 +7,7 @@ terminates HTTPS when it is reachable from the internet.
 
 Configuration (environment variables):
   AUGUSTUS_USER            sign-in name (default "caesar")
-  AUGUSTUS_PASSWORD        password, at least 12 characters, or
+  AUGUSTUS_PASSWORD        password, at least 9 characters, or
   AUGUSTUS_PASSWORD_HASH   a hash made by `python server.py hash-password`
   AUGUSTUS_GAME_SOURCE     "server": game files are taken from AUGUSTUS_GAME_DIR
                            "local" (default): each browser picks a game folder
@@ -53,7 +53,7 @@ PAGE = "augustus.html"
 # ---- Shared ------------------------------------------------------------------
 VERSION = "1"
 COOKIE = PREFIX.lower() + "_session"
-MIN_PASSWORD_LENGTH = 12
+MIN_PASSWORD_LENGTH = 9
 MAX_SAVE_BYTES = 128 * 2**20
 SAVE_VERSIONS_KEPT = 5
 TRASH_DAYS = 30

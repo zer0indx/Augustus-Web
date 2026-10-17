@@ -19,7 +19,7 @@ services:
       - "${AUGUSTUS_HTTP_PORT:-8080}:8080"
     environment:
       AUGUSTUS_USER: ${AUGUSTUS_USER:-caesar}
-      AUGUSTUS_PASSWORD: ${AUGUSTUS_PASSWORD:?set AUGUSTUS_PASSWORD (at least 12 characters)}
+      AUGUSTUS_PASSWORD: ${AUGUSTUS_PASSWORD:?set AUGUSTUS_PASSWORD (at least 9 characters)}
       # "server": the game files come from the folder mounted at /game.
       # "local": every browser picks its own Caesar III folder.
       AUGUSTUS_GAME_SOURCE: ${AUGUSTUS_GAME_SOURCE:-server}

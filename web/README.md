@@ -17,7 +17,7 @@ No game files are included. The original **Caesar III** files (GOG, Steam or CD)
 ## Quick start
 
 ```bash
-cp .env.example .env      # set your paths and AUGUSTUS_PASSWORD, at least 12 characters
+cp .env.example .env      # set your paths and AUGUSTUS_PASSWORD, at least 9 characters
 docker compose up -d --build
 ```
 
@@ -36,7 +36,7 @@ The GitHub workflow in `.github/workflows/docker.yml` publishes the image as `gh
 | Variable | Meaning |
 |---|---|
 | `AUGUSTUS_USER` | Sign-in name (default `caesar`) |
-| `AUGUSTUS_PASSWORD` | Password, at least 12 characters. There is no default: the container does not start without one. Or `AUGUSTUS_PASSWORD_HASH`, made with `docker run --rm -it augustus-web python /app/server.py hash-password` |
+| `AUGUSTUS_PASSWORD` | Password, at least 9 characters. There is no default: the container does not start without one. Or `AUGUSTUS_PASSWORD_HASH`, made with `docker run --rm -it augustus-web python /app/server.py hash-password` |
 | `AUGUSTUS_GAME_SOURCE` | `server` or `local`, see below (default `server`) |
 | `AUGUSTUS_GAME_PATH` | The Caesar III folder on the host (the one with `c3.sg2`, `c3.eng`), mounted read-only at `/game`. Only read with `AUGUSTUS_GAME_SOURCE=server` |
 | `AUGUSTUS_DATA_PATH` | Where `/data` lives: the saves, their older versions and the session secret. Not set: the Docker volume `augustus-data`. A path on the host (with a slash): that folder |
